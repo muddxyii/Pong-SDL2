@@ -137,6 +137,9 @@ void handleEvents(Engine &engine) {
         }
         updateKeyState(engine.input, event);
     }
+    if (isKeyPressed(engine, SDL_SCANCODE_ESCAPE)) {
+        engine.windowShouldClose = true;
+    }
 }
 
 void updateKeyState(Input &input, const SDL_Event &event) {
