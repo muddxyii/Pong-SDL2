@@ -3,12 +3,14 @@ project(Pong)
 
 set(CMAKE_CXX_STANDARD 20)
 
+if(APPLE)
+    set(SDL2_DIR "/opt/homebrew/lib/cmake/SDL2")
+endif()
 find_package(SDL2 REQUIRED)
-include_directories(Pong ${SDL2_INCLUDE_DIRS})
-include_directories(Pong ${GLM_INCLUDE_DIRS})
 
 find_package(glm REQUIRED)
 
 add_executable(Pong main.cpp)
-target_link_libraries(Pong ${SDL2_LIBRARIES})
-target_link_libraries(Pong ${GLM_LIBRARIES})
+
+target_include_directories(Pong PRIVATE ${SDL2_INCLUDE_DIRS})
+target_link_libraries(Pong PRIVATE SDL2::SDL2 glm::glm)
