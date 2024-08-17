@@ -7,7 +7,7 @@ constexpr uint32_t SCREEN_HEIGHT = 600;
 
 constexpr uint32_t PADDLE_WIDTH = 40;
 constexpr uint32_t PADDLE_HEIGHT = 120;
-constexpr glm::vec2 PADDLE_SPEED = glm::vec2(0.0f, 25.0f);
+constexpr glm::vec2 PADDLE_SPEED = glm::vec2(0.0f, 5.0f);
 constexpr uint32_t BALL_SIZE = 25;
 
 // Game Structs
@@ -96,8 +96,21 @@ void initGame(Game &game) {
 }
 
 void updateGame(Game &game, const Engine &engine) {
-    if (isKeyPressed(engine, SDL_SCANCODE_W)) {
-        std::cout << "W key is being pressed." << std::endl;
+    // Left Paddle
+    if (isKeyPressed(engine, SDL_SCANCODE_W) &&
+            0 < game.paddles[0].rect.y) {
+        game.paddles[0].rect.y -= PADDLE_SPEED.y;
+        } else if (isKeyPressed(engine, SDL_SCANCODE_S) &&
+            SCREEN_HEIGHT - PADDLE_HEIGHT> game.paddles[0].rect.y) {
+        game.paddles[0].rect.y += PADDLE_SPEED.y;
+    }
+    // Right Paddle
+    if (isKeyPressed(engine, SDL_SCANCODE_UP) &&
+            0 < game.paddles[1].rect.y) {
+        game.paddles[1].rect.y -= PADDLE_SPEED.y;
+    } else if (isKeyPressed(engine, SDL_SCANCODE_DOWN) &&
+            SCREEN_HEIGHT - PADDLE_HEIGHT> game.paddles[1].rect.y) {
+        game.paddles[1].rect.y += PADDLE_SPEED.y;
     }
 }
 
