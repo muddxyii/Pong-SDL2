@@ -1,9 +1,28 @@
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <glm/glm.hpp>
 
 constexpr uint32_t SCREEN_WIDTH = 800;
 constexpr uint32_t SCREEN_HEIGHT = 600;
 
+constexpr uint32_t PADDLE_WIDTH = 40;
+constexpr uint32_t PADDLE_HEIGHT = 120;
+constexpr glm::vec2 PADDLE_SPEED = glm::vec2(0.0f, 25.0f);
+constexpr uint32_t BALL_SIZE = 25;
+
+// Game Structs
+struct Entity {
+    SDL_Rect rect = {};
+    glm::vec2 velocity = {};
+};
+
+struct Game {
+    Entity paddles[2] = {};
+    Entity ball = {};
+    uint32_t scores[2] = {};
+};
+
+// Engine Structs
 struct Input {
     bool keyState[SDL_NUM_SCANCODES];
 };
@@ -15,19 +34,28 @@ struct Engine {
     bool windowShouldClose = false;
 };
 
+// Game Functions
+//////////////////
+void initGame(Game &game);
+void updateGame(Game &game, const Engine &engine);
+void renderGame(const Game &game, const Engine &engine);
+//////////////////
+
+// Engine Functions
+//////////////////
 // Init
 bool initEngine(Engine &engine);
-
 // I/O Related
 void handleEvents(Engine &engine);
 void updateKeyState(Input &input, const SDL_Event &event);
 bool isKeyPressed(const Engine &engine, SDL_Scancode key);
-
 // Rendering
 void render(const Engine &engine);
-
+void renderEntity(const Engine &engine, const Entity& entity);
+void presentRender(const Engine &engine);
 // Quit
 void quitEngine(Engine &engine);
+////////////////
 
 int main(int argc, char* args[])
 {
@@ -36,17 +64,47 @@ int main(int argc, char* args[])
         return -1;
     };
 
+    Game game;
+    initGame(game);
+
     while (!engine.windowShouldClose) {
+        // get input
         handleEvents(engine);
+
+        // update game
+        updateGame(game, engine);
+
+        // start render
         render(engine);
 
-        if (isKeyPressed(engine, SDL_SCANCODE_W)) {
-            std::cout << "W key is being pressed." << std::endl;
-        }
+        // render game
+        renderGame(game, engine);
+
+        // present render
+        presentRender(engine);
     }
 
     quitEngine(engine);
     return 0;
+}
+
+void initGame(Game &game) {
+    constexpr int centerOfPaddle = SCREEN_HEIGHT / 2 - PADDLE_HEIGHT / 2;
+    game.paddles[0].rect = SDL_Rect{ PADDLE_WIDTH, centerOfPaddle, PADDLE_WIDTH, PADDLE_HEIGHT };
+    game.paddles[1].rect = SDL_Rect{ SCREEN_WIDTH - PADDLE_WIDTH * 2, centerOfPaddle, PADDLE_WIDTH, PADDLE_HEIGHT };
+    game.ball.rect = SDL_Rect{ SCREEN_WIDTH / 2 - BALL_SIZE / 2, SCREEN_HEIGHT / 2 - BALL_SIZE / 2, BALL_SIZE, BALL_SIZE };
+}
+
+void updateGame(Game &game, const Engine &engine) {
+    if (isKeyPressed(engine, SDL_SCANCODE_W)) {
+        std::cout << "W key is being pressed." << std::endl;
+    }
+}
+
+void renderGame(const Game &game, const Engine &engine) {
+    renderEntity(engine, game.paddles[0]);
+    renderEntity(engine, game.paddles[1]);
+    renderEntity(engine, game.ball);
 }
 
 bool initEngine(Engine &engine) {
@@ -93,13 +151,19 @@ bool isKeyPressed(const Engine &engine, const SDL_Scancode key) {
     return engine.input.keyState[key];
 }
 
-
 void render(const Engine &engine) {
     SDL_SetRenderDrawColor(engine.renderer, 0, 0, 0, 255); // Black background
     SDL_RenderClear(engine.renderer);
-    SDL_RenderPresent(engine.renderer);
 }
 
+void renderEntity(const Engine &engine, const Entity& entity) {
+    SDL_SetRenderDrawColor(engine.renderer, 255, 255, 255, 255); // White for entity
+    SDL_RenderDrawRect(engine.renderer, &entity.rect);
+}
+
+void presentRender(const Engine &engine) {
+    SDL_RenderPresent(engine.renderer);
+}
 
 void quitEngine(Engine &engine) {
     SDL_DestroyRenderer(engine.renderer);
