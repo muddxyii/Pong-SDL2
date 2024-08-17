@@ -12,5 +12,5 @@ find_package(glm REQUIRED)
 
 add_executable(Pong main.cpp)
 
-target_include_directories(Pong PRIVATE ${SDL2_INCLUDE_DIRS})
+target_include_directories(Pong PRIVATE ${SDL2_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS})
 target_link_libraries(Pong PRIVATE SDL2::SDL2 glm::glm)
