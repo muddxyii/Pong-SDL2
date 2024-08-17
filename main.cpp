@@ -93,6 +93,7 @@ void initGame(Game &game) {
     game.paddles[0].rect = SDL_Rect{ PADDLE_WIDTH, centerOfPaddle, PADDLE_WIDTH, PADDLE_HEIGHT };
     game.paddles[1].rect = SDL_Rect{ SCREEN_WIDTH - PADDLE_WIDTH * 2, centerOfPaddle, PADDLE_WIDTH, PADDLE_HEIGHT };
     game.ball.rect = SDL_Rect{ SCREEN_WIDTH / 2 - BALL_SIZE / 2, SCREEN_HEIGHT / 2 - BALL_SIZE / 2, BALL_SIZE, BALL_SIZE };
+    game.ball.velocity = glm::vec2{ 1.0f, -1.0f };
 }
 
 void updateGame(Game &game, const Engine &engine) {
@@ -111,6 +112,27 @@ void updateGame(Game &game, const Engine &engine) {
     } else if (isKeyPressed(engine, SDL_SCANCODE_DOWN) &&
             SCREEN_HEIGHT - PADDLE_HEIGHT> game.paddles[1].rect.y) {
         game.paddles[1].rect.y += PADDLE_SPEED.y;
+    }
+
+    // Ball
+    game.ball.rect.x += static_cast<int>(game.ball.velocity.x);
+    game.ball.rect.y += static_cast<int>(game.ball.velocity.y);
+    if (0 > game.ball.rect.y || SCREEN_HEIGHT - BALL_SIZE < game.ball.rect.y) // Top & Bottom Wall Collision
+        game.ball.velocity.y = -game.ball.velocity.y;
+    if (SDL_HasIntersection(&game.paddles[0].rect, &game.ball.rect) || SDL_HasIntersection(&game.paddles[1].rect, &game.ball.rect))
+        game.ball.velocity.x = -game.ball.velocity.x;
+    if (0 > game.ball.rect.x) {
+        // Rest Ball Position
+        game.ball.rect = SDL_Rect{ SCREEN_WIDTH / 2 - BALL_SIZE / 2, SCREEN_HEIGHT / 2 - BALL_SIZE / 2, BALL_SIZE, BALL_SIZE };
+
+        // Update scores
+        game.scores[0] += 1;
+    } else if (SCREEN_WIDTH - BALL_SIZE < game.ball.rect.x) {
+        // Rest Ball Position
+        game.ball.rect = SDL_Rect{ SCREEN_WIDTH / 2 - BALL_SIZE / 2, SCREEN_HEIGHT / 2 - BALL_SIZE / 2, BALL_SIZE, BALL_SIZE };
+
+        // Update scores
+        game.scores[1] += 1;
     }
 }
 
